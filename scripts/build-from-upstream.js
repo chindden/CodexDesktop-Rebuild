@@ -113,12 +113,12 @@ function buildMac(platform) {
 
   console.log(`   [source] ${appPath}`);
 
-  // 2. Copy .app to output
+  // 2. Copy .app to output (use cp -a to preserve symlinks)
   const outAppDir = path.join(OUT_DIR, platform);
   clearDir(outAppDir);
   const outApp = path.join(outAppDir, "Codex.app");
   console.log("   [copy] Codex.app -> out/");
-  copyRecursive(appPath, outApp);
+  execSync(`cp -a "${appPath}" "${outApp}"`);
 
   const resourcesDir = path.join(outApp, "Contents", "Resources");
 
