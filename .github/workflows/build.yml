@@ -9,6 +9,14 @@ on:
         default: "all"
         type: choice
         options: [all, mac, windows, linux]
+      release_name:
+        description: "Release name (optional). If empty, will use 'Codex <version>'"
+        required: false
+        default: ""
+      prerelease:
+        description: "Create as prerelease?"
+        required: false
+        default: "false"
 
 env:
   NODE_VERSION: "24"
@@ -92,3 +100,42 @@ jobs:
             out/make/deb/**/*.deb
             out/make/rpm/**/*.rpm
             out/make/zip/**/*.zip
+
+  publish:
+    needs: [build-mac, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Read version from package.json and set TAG
+        id: read_version
+        run: |
+          VERSION=$(node -e "console.log(require('./package.json').version)")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG=Codex_$VERSION" >> $GITHUB_ENV
+          if [ -z "${{ github.event.inputs.release_name }}" ]; then
+            echo "RELEASE_NAME=Codex $VERSION" >> $GITHUB_ENV
+          else
+            echo "RELEASE_NAME=${{ github.event.inputs.release_name }}" >> $GITHUB_ENV
+          fi
+          echo "PRERELEASE=${{ github.event.inputs.prerelease }}" >> $GITHUB_ENV
+
+      - name: Create GitHub Release and upload assets
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.TAG }}
+          name: ${{ env.RELEASE_NAME }}
+          body: ${{ github.event.inputs.release_body }}
+          prere](#)
