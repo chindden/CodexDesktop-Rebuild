@@ -21,6 +21,9 @@ on:
 env:
   NODE_VERSION: "24"
 
+permissions:
+  contents: write
+
 jobs:
   build-mac:
     if: inputs.platform == 'all' || inputs.platform == 'mac'
@@ -139,4 +142,4 @@ jobs:
           name: ${{ env.RELEASE_NAME }}
           body: ${{ github.event.inputs.release_body }}
           prerelease: ${{ env.PRERELEASE }}
-          files: artifacts/**
+          artifacts: artifacts/**
