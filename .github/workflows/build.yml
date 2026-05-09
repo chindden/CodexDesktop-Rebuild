@@ -138,4 +138,5 @@ jobs:
           tag: ${{ env.TAG }}
           name: ${{ env.RELEASE_NAME }}
           body: ${{ github.event.inputs.release_body }}
-          prere](#)
+          prerelease: ${{ env.PRERELEASE }}
+          files: artifacts/**
